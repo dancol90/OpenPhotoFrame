@@ -45,6 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
 
   late int _slideDurationMinutes;
   late double _transitionDurationSeconds;
+  late double _longPressDurationSeconds;
   late bool _blurBorders;
   late String _syncType;
   late TextEditingController _nextcloudUrlController;
@@ -128,6 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     final config = context.read<ConfigProvider>();
     _slideDurationMinutes = (config.slideDurationSeconds / 60).round().clamp(1, 15);
     _transitionDurationSeconds = (config.transitionDurationMs / 1000.0).clamp(0.5, 5.0);
+    _longPressDurationSeconds = (config.longPressDurationMs / 1000.0).clamp(1.0, 30.0);
     _blurBorders = config.blurBorders;
     // Default sync type: app_folder on Android, local_folder on Desktop
     final defaultSyncType = Platform.isAndroid ? 'app_folder' : 'local_folder';
@@ -316,6 +318,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     
     config.slideDurationSeconds = _slideDurationMinutes * 60;
     config.transitionDurationMs = (_transitionDurationSeconds * 1000).round();
+    config.longPressDurationMs = (_longPressDurationSeconds * 1000).round();
     config.blurBorders = _blurBorders;
     // app_folder and local_folder both use empty activeSourceType (no sync)
     final isLocalMode = _syncType == 'local_folder' || _syncType == 'app_folder';
@@ -429,6 +432,21 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
             formatValue: (v) => v.toStringAsFixed(1),
             onChanged: (value) {
               setState(() => _transitionDurationSeconds = value);
+            },
+          ),
+
+          // Open settings long press duration (0.5 - 5 seconds, 0.5s steps)
+          _buildSliderSetting(
+            icon: Icons.touch_app,
+            title: AppLocalizations.of(context)!.longPressDuration,
+            value: _longPressDurationSeconds,
+            min: 1,
+            max: 30.0,
+            divisions: 29,
+            unit: AppLocalizations.of(context)!.unitSeconds,
+            formatValue: (v) => v.toStringAsFixed(1),
+            onChanged: (value) {
+              setState(() => _longPressDurationSeconds = value);
             },
           ),
 

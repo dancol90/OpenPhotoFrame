@@ -261,6 +261,14 @@ class JsonConfigService extends ConfigProvider {
   }
 
   @override
+  int get longPressDurationMs => _config['long_press_duration_ms'] ?? 2000;
+  
+  @override
+  set longPressDurationMs(int value) {
+    _config['long_press_duration_ms'] = value;
+  }
+
+  @override
   bool get blurBorders => _config['blur_borders'] ?? true;
 
   @override

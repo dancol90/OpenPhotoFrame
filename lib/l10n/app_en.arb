@@ -6,6 +6,7 @@
   "sectionSlideshow": "Slideshow",
   "slideDuration": "Slide Duration",
   "transitionDuration": "Transition Duration",
+  "longPressDuration": "Long press duration to open settings",
   "blurBorders": "Blur Borders",
   "blurBordersSubtitle": "Extend image to screen size",
   "unitMinutes": "min",

@@ -17,6 +17,9 @@ abstract class ConfigProvider extends ChangeNotifier {
   int get transitionDurationMs; // Fade transition duration
   set transitionDurationMs(int value);
 
+  int get longPressDurationMs; // Setting long press duration
+  set longPressDurationMs(int value);
+
   bool get blurBorders; // Blur borders outside image
   set blurBorders(bool value);
   

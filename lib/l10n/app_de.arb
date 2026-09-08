@@ -6,6 +6,7 @@
   "sectionSlideshow": "Diashow",
   "slideDuration": "Anzeigedauer",
   "transitionDuration": "Überblendzeit",
+  "longPressDuration": "Long press duration to open settings",
   "blurBorders": "Rand unscharf",
   "blurBordersSubtitle": "Bild mit Unschärfe bis zum Bildschirmrand zeichnen",
   "unitMinutes": "Min",

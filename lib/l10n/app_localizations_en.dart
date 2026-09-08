@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transitionDuration => 'Transition Duration';
 
   @override
+  String get longPressDuration => 'Long press duration to open settings';
+
+  @override
   String get blurBorders => 'Blur Borders';
 
   @override

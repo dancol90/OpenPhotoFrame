@@ -82,6 +82,8 @@ class _SlideshowScreenState extends State<SlideshowScreen> with TickerProviderSt
   // Current photo location name (from geocoding)
   String? _currentLocationName;
 
+  Timer? _longPressTimer;
+
   @override
   void initState() {
     super.initState();
@@ -437,6 +439,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> with TickerProviderSt
   }
 
   void _openSettings() {
+    print("Opening settings page");
     _timer?.cancel(); // Stop auto-advance while in settings
     
     Navigator.of(context).push(
@@ -624,6 +627,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> with TickerProviderSt
     _photosSubscription?.cancel();
     _scheduleSubscription?.cancel();
     _scheduleTimer?.cancel();
+    _longPressTimer?.cancel();
     for (var slide in _slides) {
       slide.controller.dispose();
     }
@@ -758,9 +762,6 @@ class _SlideshowScreenState extends State<SlideshowScreen> with TickerProviderSt
                 } else if (dx < width * 0.25) {
                   print("Action: Tap Previous");
                   _manualNavigation(false); // Left 25% -> Previous
-                } else {
-                  print("Action: Open Settings");
-                  _openSettings();
                 }
               },
               onHorizontalDragEnd: (details) {
@@ -777,7 +778,32 @@ class _SlideshowScreenState extends State<SlideshowScreen> with TickerProviderSt
               },
             ),
           ),
-          
+
+          Align(
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: GestureDetector(
+                onTapDown: (_) {
+                  print("Action: Long press started on screen center");
+                  _longPressTimer = Timer(
+                    Duration(milliseconds: config.longPressDurationMs),
+                    _openSettings,
+                  );
+                },
+                onTapUp: (_) {
+                  print("Action: Long press not long enough");
+                  _longPressTimer?.cancel();
+                },
+                onTapCancel: () {
+                  print("Action: Tap cancelled");
+                  _longPressTimer?.cancel();
+                },
+              ),
+            ),
+          ),
+
           // 5. Black overlay when display is "off" (for LCD displays)
           // Uses IgnorePointer so touch events pass through to the layer below
           if (_isDisplayOff)

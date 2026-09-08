@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Transition Duration'**
   String get transitionDuration;
 
+  /// No description provided for @longPressDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Long press duration to open settings'**
+  String get longPressDuration;
+
   /// No description provided for @blurBorders.
   ///
   /// In en, this message translates to:
