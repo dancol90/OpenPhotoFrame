@@ -82,6 +82,7 @@ class HybridPhotoRepository implements PhotoRepository {
     // Remove MediaStore listener
     if (_mediaStoreListenerRegistered) {
       PhotoManager.removeChangeCallback(_onMediaStoreChanged);
+      PhotoManager.stopChangeNotify();
       _mediaStoreListenerRegistered = false;
     }
   }
@@ -189,6 +190,7 @@ class HybridPhotoRepository implements PhotoRepository {
   void _setupMediaStoreListener() {
     if (!_mediaStoreListenerRegistered) {
       PhotoManager.addChangeCallback(_onMediaStoreChanged);
+      PhotoManager.startChangeNotify();
       _mediaStoreListenerRegistered = true;
     }
   }
