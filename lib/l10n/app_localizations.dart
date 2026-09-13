@@ -104,6 +104,18 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// No description provided for @openFileManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Open file manager'**
+  String get openFileManager;
+
+  /// No description provided for @fileManagerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open a file manager on this device.'**
+  String get fileManagerUnavailable;
+
   /// No description provided for @sectionSlideshow.
   ///
   /// In en, this message translates to:

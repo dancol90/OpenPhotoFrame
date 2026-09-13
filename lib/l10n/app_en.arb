@@ -2,6 +2,8 @@
   "@@locale": "en",
   
   "settings": "Settings",
+  "openFileManager": "Open file manager",
+  "fileManagerUnavailable": "Unable to open a file manager on this device.",
   
   "sectionSlideshow": "Slideshow",
   "slideDuration": "Slide Duration",

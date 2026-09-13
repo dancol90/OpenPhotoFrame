@@ -2,6 +2,8 @@
   "@@locale": "de",
   
   "settings": "Einstellungen",
+  "openFileManager": "Dateimanager öffnen",
+  "fileManagerUnavailable": "Auf diesem Gerät konnte kein Dateimanager geöffnet werden.",
   
   "sectionSlideshow": "Diashow",
   "slideDuration": "Anzeigedauer",

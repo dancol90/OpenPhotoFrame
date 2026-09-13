@@ -14,6 +14,7 @@ import '../../domain/interfaces/sync_provider.dart';
 import '../../infrastructure/repositories/hybrid_photo_repository.dart';
 import '../../infrastructure/services/photo_service.dart';
 import '../../infrastructure/services/native_updater_service.dart';
+import '../../infrastructure/services/native_file_manager_service.dart';
 import '../../infrastructure/services/update_service.dart';
 import '../../infrastructure/services/webdav_source_config.dart';
 import '../../infrastructure/services/webdav_sync_service.dart';
@@ -617,6 +618,13 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
           if (Platform.isAndroid) ...[
             _buildSectionHeader(AppLocalizations.of(context)!.sectionAndroid),
             const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.folder_open),
+              title: Text(AppLocalizations.of(context)!.openFileManager),
+              trailing: const Icon(Icons.open_in_new),
+              onTap: _openFileManager,
+            ),
+            const SizedBox(height: 8),
             
             SwitchListTile(
               title: Text(AppLocalizations.of(context)!.startOnBoot),
@@ -692,6 +700,16 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     );
   }
   
+  Future<void> _openFileManager() async {
+    final opened = await NativeFileManagerService.openFileManager();
+    if (!mounted || opened) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.fileManagerUnavailable),
+      ),
+    );
+  }
+
   Widget _buildAutoUpdateSection() {
     final l10n = AppLocalizations.of(context)!;
     final hintColor = Theme.of(context).colorScheme.onSurfaceVariant;

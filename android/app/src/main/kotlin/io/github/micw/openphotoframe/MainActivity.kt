@@ -47,6 +47,8 @@ class MainActivity : FlutterActivity() {
 
         updaterHandler = UpdaterHandler(this)
         updaterHandler.configureChannel(flutterEngine)
+
+        FileManagerHandler(this).configureChannel(flutterEngine)
     }
 
     override fun onStart() {

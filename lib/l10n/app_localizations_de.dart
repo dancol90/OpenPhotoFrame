@@ -12,6 +12,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings => 'Einstellungen';
 
   @override
+  String get openFileManager => 'Dateimanager öffnen';
+
+  @override
+  String get fileManagerUnavailable =>
+      'Auf diesem Gerät konnte kein Dateimanager geöffnet werden.';
+
+  @override
   String get sectionSlideshow => 'Diashow';
 
   @override
