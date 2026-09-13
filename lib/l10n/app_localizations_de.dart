@@ -12,6 +12,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings => 'Einstellungen';
 
   @override
+  String get openDeviceSettings => 'Geräteeinstellungen öffnen';
+
+  @override
+  String get deviceSettingsUnavailable =>
+      'Auf diesem Gerät konnten die Einstellungen nicht geöffnet werden.';
+
+  @override
   String get openFileManager => 'Dateimanager öffnen';
 
   @override

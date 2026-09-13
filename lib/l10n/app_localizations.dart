@@ -104,6 +104,18 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// No description provided for @openDeviceSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open device settings'**
+  String get openDeviceSettings;
+
+  /// No description provided for @deviceSettingsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open settings on this device.'**
+  String get deviceSettingsUnavailable;
+
   /// No description provided for @openFileManager.
   ///
   /// In en, this message translates to:

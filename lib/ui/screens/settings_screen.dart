@@ -625,6 +625,13 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
               onTap: _openFileManager,
             ),
             const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: Text(AppLocalizations.of(context)!.openDeviceSettings),
+              trailing: const Icon(Icons.open_in_new),
+              onTap: _openDeviceSettings,
+            ),
+            const SizedBox(height: 8),
             
             SwitchListTile(
               title: Text(AppLocalizations.of(context)!.startOnBoot),
@@ -700,6 +707,16 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     );
   }
   
+  Future<void> _openDeviceSettings() async {
+    final opened = await NativeScreenControlService.openDeviceSettings();
+    if (!mounted || opened) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.deviceSettingsUnavailable),
+      ),
+    );
+  }
+
   Future<void> _openFileManager() async {
     final opened = await NativeFileManagerService.openFileManager();
     if (!mounted || opened) return;

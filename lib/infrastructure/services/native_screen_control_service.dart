@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 
 /// Native screen control service using Android Device Admin API.
 /// 
@@ -14,6 +15,19 @@ class NativeScreenControlService {
   
   /// Check if the platform supports native screen control.
   static bool get isSupported => Platform.isAndroid;
+
+  /// Opens the main Android Settings screen.
+  static Future<bool> openDeviceSettings() async {
+    if (!isSupported) return false;
+    try {
+      return await _channel.invokeMethod<bool>('openDeviceSettings') ?? false;
+    } catch (e) {
+      Logger('NativeScreenControlService').warning(
+        'Error opening device settings', e,
+      );
+      return false;
+    }
+  }
   
   /// Check if Device Admin is enabled for this app.
   static Future<bool> isDeviceAdminEnabled() async {

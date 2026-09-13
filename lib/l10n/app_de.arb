@@ -2,6 +2,8 @@
   "@@locale": "de",
   
   "settings": "Einstellungen",
+  "openDeviceSettings": "Geräteeinstellungen öffnen",
+  "deviceSettingsUnavailable": "Auf diesem Gerät konnten die Einstellungen nicht geöffnet werden.",
   "openFileManager": "Dateimanager öffnen",
   "fileManagerUnavailable": "Auf diesem Gerät konnte kein Dateimanager geöffnet werden.",
   

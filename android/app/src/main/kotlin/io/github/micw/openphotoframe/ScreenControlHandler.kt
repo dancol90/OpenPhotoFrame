@@ -58,6 +58,7 @@ class ScreenControlHandler(private val context: Context) {
                     openDeviceAdminSettings()
                     result.success(null)
                 }
+                "openDeviceSettings" -> result.success(openDeviceSettings())
                 "turnScreenOff" -> {
                     val success = turnScreenOff()
                     result.success(success)
@@ -120,9 +121,26 @@ class ScreenControlHandler(private val context: Context) {
     }
 
     /**
-     * Open the Device Admin settings where the user can disable this app.
-     * Useful for uninstalling the app.
+     * Open the main Android Settings screen.
      */
+    private fun openDeviceSettings(): Boolean {
+        return try {
+            val intent = Intent(android.provider.Settings.ACTION_SETTINGS)
+            if (context !is android.app.Activity) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            true
+        } catch (e: android.content.ActivityNotFoundException) {
+            Log.w(TAG, "Device settings unavailable", e)
+            false
+        } catch (e: SecurityException) {
+            Log.w(TAG, "Cannot open device settings", e)
+            false
+        }
+    }
+
+    /** Open Device Admin settings so the user can disable this app's admin access. */
     private fun openDeviceAdminSettings() {
         try {
             // Try to open Device Admin settings directly

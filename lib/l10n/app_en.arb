@@ -2,6 +2,8 @@
   "@@locale": "en",
   
   "settings": "Settings",
+  "openDeviceSettings": "Open device settings",
+  "deviceSettingsUnavailable": "Unable to open settings on this device.",
   "openFileManager": "Open file manager",
   "fileManagerUnavailable": "Unable to open a file manager on this device.",
   
