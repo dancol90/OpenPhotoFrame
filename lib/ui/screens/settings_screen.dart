@@ -48,6 +48,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
   late double _transitionDurationSeconds;
   late double _longPressDurationSeconds;
   late bool _blurBorders;
+  late String _playlistStrategyId;
   late String _syncType;
   late TextEditingController _nextcloudUrlController;
   late WebDavAuthMode _webdavAuthMode;
@@ -132,6 +133,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     _transitionDurationSeconds = (config.transitionDurationMs / 1000.0).clamp(0.5, 5.0);
     _longPressDurationSeconds = (config.longPressDurationMs / 1000.0).clamp(1.0, 30.0);
     _blurBorders = config.blurBorders;
+    _playlistStrategyId = config.playlistStrategyId;
     // Default sync type: app_folder on Android, local_folder on Desktop
     final defaultSyncType = Platform.isAndroid ? 'app_folder' : 'local_folder';
     _syncType = config.activeSourceType.isEmpty ? defaultSyncType : config.activeSourceType;
@@ -321,6 +323,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     config.transitionDurationMs = (_transitionDurationSeconds * 1000).round();
     config.longPressDurationMs = (_longPressDurationSeconds * 1000).round();
     config.blurBorders = _blurBorders;
+    config.playlistStrategyId = _playlistStrategyId;
     // app_folder and local_folder both use empty activeSourceType (no sync)
     final isLocalMode = _syncType == 'local_folder' || _syncType == 'app_folder';
     config.activeSourceType = isLocalMode ? '' : _syncType;
@@ -462,9 +465,38 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
               setState(() => _blurBorders = value);
             },
           ),
-          
+
           const SizedBox(height: 16),
-          
+
+          ListTile(
+            leading: const Icon(Icons.shuffle),
+            title: Text(AppLocalizations.of(context)!.playlistOrder),
+            subtitle: Text(AppLocalizations.of(context)!.playlistOrderSubtitle),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SegmentedButton<String>(
+              segments: [
+                ButtonSegment(
+                  value: 'weighted_freshness',
+                  label: Text(AppLocalizations.of(context)!.playlistOrderShuffle),
+                  icon: const Icon(Icons.shuffle),
+                ),
+                ButtonSegment(
+                  value: 'sequential',
+                  label: Text(AppLocalizations.of(context)!.playlistOrderSequential),
+                  icon: const Icon(Icons.format_list_numbered),
+                ),
+              ],
+              selected: {_playlistStrategyId},
+              onSelectionChanged: (value) {
+                setState(() => _playlistStrategyId = value.first);
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
           // Screen Orientation
           _buildScreenOrientationSelector(),
           

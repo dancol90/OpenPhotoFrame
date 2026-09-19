@@ -13,6 +13,10 @@
   "longPressDuration": "Long press duration to open settings",
   "blurBorders": "Blur Borders",
   "blurBordersSubtitle": "Extend image to screen size",
+  "playlistOrder": "Playback Order",
+  "playlistOrderSubtitle": "How photos are picked for the slideshow",
+  "playlistOrderShuffle": "Smart Shuffle",
+  "playlistOrderSequential": "Sequential",
   "unitMinutes": "min",
   "unitSeconds": "sec",
   

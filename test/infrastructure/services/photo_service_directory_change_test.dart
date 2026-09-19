@@ -95,7 +95,12 @@ class MockConfigProvider extends ChangeNotifier implements ConfigProvider {
   bool get blurBorders => true;
   @override
   set blurBorders(bool value) {}
-  
+
+  @override
+  String get playlistStrategyId => 'weighted_freshness';
+  @override
+  set playlistStrategyId(String value) {}
+
   @override
   int get syncIntervalMinutes => _syncIntervalMinutes;
   @override

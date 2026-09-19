@@ -44,6 +44,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get blurBordersSubtitle => 'Extend image to screen size';
 
   @override
+  String get playlistOrder => 'Playback Order';
+
+  @override
+  String get playlistOrderSubtitle => 'How photos are picked for the slideshow';
+
+  @override
+  String get playlistOrderShuffle => 'Smart Shuffle';
+
+  @override
+  String get playlistOrderSequential => 'Sequential';
+
+  @override
   String get unitMinutes => 'min';
 
   @override

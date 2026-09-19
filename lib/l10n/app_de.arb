@@ -13,6 +13,10 @@
   "longPressDuration": "Long press duration to open settings",
   "blurBorders": "Rand unscharf",
   "blurBordersSubtitle": "Bild mit Unschärfe bis zum Bildschirmrand zeichnen",
+  "playlistOrder": "Wiedergabereihenfolge",
+  "playlistOrderSubtitle": "Wie Fotos für die Diashow ausgewählt werden",
+  "playlistOrderShuffle": "Intelligente Zufallswiedergabe",
+  "playlistOrderSequential": "Chronologisch",
   "unitMinutes": "Min",
   "unitSeconds": "Sek",
   

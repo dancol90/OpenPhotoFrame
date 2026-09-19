@@ -276,6 +276,14 @@ class JsonConfigService extends ConfigProvider {
     _config['blur_borders'] = value;
   }
 
+  @override
+  String get playlistStrategyId => _config['playlist_strategy_id'] ?? 'weighted_freshness';
+
+  @override
+  set playlistStrategyId(String value) {
+    _config['playlist_strategy_id'] = value;
+  }
+
 
   // Sync settings
   @override

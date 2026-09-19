@@ -22,6 +22,10 @@ abstract class ConfigProvider extends ChangeNotifier {
 
   bool get blurBorders; // Blur borders outside image
   set blurBorders(bool value);
+
+  // Values: 'weighted_freshness' (smart shuffle), 'sequential' (chronological order)
+  String get playlistStrategyId;
+  set playlistStrategyId(String value);
   
   // Sync settings
   int get syncIntervalMinutes; // 0 = disabled, otherwise interval in minutes

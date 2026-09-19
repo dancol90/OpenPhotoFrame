@@ -23,6 +23,8 @@ import 'infrastructure/services/local_storage_provider.dart';
 import 'infrastructure/services/native_display_controller.dart';
 import 'infrastructure/services/update_service.dart';
 import 'infrastructure/repositories/hybrid_photo_repository.dart';
+import 'infrastructure/strategies/selectable_playlist_strategy.dart';
+import 'infrastructure/strategies/sequential_strategy.dart';
 import 'infrastructure/strategies/weighted_freshness_strategy.dart';
 import 'ui/dialogs/update_dialog.dart';
 import 'ui/screens/slideshow_screen.dart';
@@ -85,7 +87,13 @@ class OpenPhotoFrameApp extends StatelessWidget {
           create: (_) => ExifMetadataProvider(),
         ),
         Provider<PlaylistStrategy>(
-          create: (_) => WeightedFreshnessStrategy(),
+          create: (context) => SelectablePlaylistStrategy(
+            configProvider: context.read<ConfigProvider>(),
+            strategies: [
+              WeightedFreshnessStrategy(),
+              SequentialStrategy(),
+            ],
+          ),
         ),
         Provider<DisplayController>(
           create: (_) => NativeDisplayController(),

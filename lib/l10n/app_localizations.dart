@@ -164,6 +164,30 @@ abstract class AppLocalizations {
   /// **'Extend image to screen size'**
   String get blurBordersSubtitle;
 
+  /// No description provided for @playlistOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback Order'**
+  String get playlistOrder;
+
+  /// No description provided for @playlistOrderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How photos are picked for the slideshow'**
+  String get playlistOrderSubtitle;
+
+  /// No description provided for @playlistOrderShuffle.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Shuffle'**
+  String get playlistOrderShuffle;
+
+  /// No description provided for @playlistOrderSequential.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequential'**
+  String get playlistOrderSequential;
+
   /// No description provided for @unitMinutes.
   ///
   /// In en, this message translates to:

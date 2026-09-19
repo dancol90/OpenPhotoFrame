@@ -45,6 +45,19 @@ class AppLocalizationsDe extends AppLocalizations {
       'Bild mit Unschärfe bis zum Bildschirmrand zeichnen';
 
   @override
+  String get playlistOrder => 'Wiedergabereihenfolge';
+
+  @override
+  String get playlistOrderSubtitle =>
+      'Wie Fotos für die Diashow ausgewählt werden';
+
+  @override
+  String get playlistOrderShuffle => 'Intelligente Zufallswiedergabe';
+
+  @override
+  String get playlistOrderSequential => 'Chronologisch';
+
+  @override
   String get unitMinutes => 'Min';
 
   @override
