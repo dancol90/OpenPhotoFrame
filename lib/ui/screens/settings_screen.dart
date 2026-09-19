@@ -44,7 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     minute: 0,
   );
 
-  late int _slideDurationMinutes;
+  late int _slideDurationSeconds;
   late double _transitionDurationSeconds;
   late double _longPressDurationSeconds;
   late bool _blurBorders;
@@ -129,7 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     
     final config = context.read<ConfigProvider>();
-    _slideDurationMinutes = (config.slideDurationSeconds / 60).round().clamp(1, 15);
+    _slideDurationSeconds = config.slideDurationSeconds.clamp(5, 900);
     _transitionDurationSeconds = (config.transitionDurationMs / 1000.0).clamp(0.5, 5.0);
     _longPressDurationSeconds = (config.longPressDurationMs / 1000.0).clamp(1.0, 30.0);
     _blurBorders = config.blurBorders;
@@ -319,7 +319,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
         _syncType == 'nextcloud_link' && 
         newNextcloudUrl.isNotEmpty;
     
-    config.slideDurationSeconds = _slideDurationMinutes * 60;
+    config.slideDurationSeconds = _slideDurationSeconds;
     config.transitionDurationMs = (_transitionDurationSeconds * 1000).round();
     config.longPressDurationMs = (_longPressDurationSeconds * 1000).round();
     config.blurBorders = _blurBorders;
@@ -408,17 +408,18 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
           _buildSectionHeader(AppLocalizations.of(context)!.sectionSlideshow),
           const SizedBox(height: 8),
           
-          // Slide Duration
+          // Slide Duration (5 seconds - 15 minutes, 5s steps)
           _buildSliderSetting(
             icon: Icons.timer,
             title: AppLocalizations.of(context)!.slideDuration,
-            value: _slideDurationMinutes.toDouble(),
-            min: 1,
-            max: 15,
-            divisions: 14,
-            unit: AppLocalizations.of(context)!.unitMinutes,
+            value: _slideDurationSeconds.toDouble(),
+            min: 5,
+            max: 900,
+            divisions: 179,
+            unit: '',
+            formatValue: (v) => _formatSlideDuration(v.round()),
             onChanged: (value) {
-              setState(() => _slideDurationMinutes = value.round());
+              setState(() => _slideDurationSeconds = value.round());
             },
           ),
           
@@ -841,6 +842,17 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     );
   }
   
+  String _formatSlideDuration(int totalSeconds) {
+    if (totalSeconds < 60) {
+      return '$totalSeconds ${AppLocalizations.of(context)!.unitSeconds}';
+    }
+    final minutes = totalSeconds / 60.0;
+    final minutesLabel = totalSeconds % 60 == 0
+        ? minutes.round().toString()
+        : minutes.toStringAsFixed(1);
+    return '$minutesLabel ${AppLocalizations.of(context)!.unitMinutes}';
+  }
+
   Widget _buildSliderSetting({
     required IconData icon,
     required String title,
@@ -853,7 +865,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     String Function(double)? formatValue,
   }) {
     final displayValue = formatValue != null ? formatValue(value) : '${value.round()}';
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -863,7 +875,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
             const SizedBox(width: 12),
             Expanded(child: Text(title)),
             Text(
-              '$displayValue $unit',
+              unit.isEmpty ? displayValue : '$displayValue $unit',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
