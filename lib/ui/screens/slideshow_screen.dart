@@ -78,6 +78,11 @@ class _SlideshowScreenState extends State<SlideshowScreen> with TickerProviderSt
   
   // Display off state for black overlay
   bool _isDisplayOff = false;
+
+  // Guards against overlapping _applyScheduleState() calls (e.g. a duplicate
+  // "resumed" lifecycle event firing while a previous call is still awaiting
+  // native display work).
+  bool _applyingScheduleState = false;
   
   // Current photo location name (from geocoding)
   String? _currentLocationName;
@@ -148,18 +153,24 @@ class _SlideshowScreenState extends State<SlideshowScreen> with TickerProviderSt
     switch (state) {
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
-        _pauseSlideshow();
+        _isPaused = true;
+        _syncTimerState();
+        _scheduleTimer?.cancel();
         break;
       case AppLifecycleState.resumed:
-        // Always re-check schedule when app comes to foreground
-        // This is critical for wake-ups where activity might already be running
+        _isPaused = false;
+        _syncTimerState();
+
+        // Always re-check schedule when app comes to foreground.
+        // This is critical for wake-ups where activity might already be running.
         final config = context.read<ConfigProvider>();
         if (config.scheduleEnabled) {
           _applyScheduleState();
+          _scheduleTimer?.cancel();
+          _scheduleTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+            _applyScheduleState();
+          });
         }
-        
-        // Resume slideshow if it was paused
-        _resumeSlideshow();
         break;
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
@@ -167,41 +178,31 @@ class _SlideshowScreenState extends State<SlideshowScreen> with TickerProviderSt
         break;
     }
   }
-  
-  /// Pause slideshow when app goes to background
-  void _pauseSlideshow() {
-    // Don't pause if already paused or if display is off (night mode)
-    if (_isPaused || _isDisplayOff) return;
-    _isPaused = true;
-    
-    print('⏸️ App paused - stopping timers and wakelock');
-    _timer?.cancel();
-    _scheduleTimer?.cancel();
-    WakelockPlus.disable();
-  }
-  
-  /// Resume slideshow when app comes back to foreground
-  void _resumeSlideshow() {
-    if (!_isPaused) return;
-    _isPaused = false;
-    
-    print('▶️ App resumed - restarting timers and wakelock');
-    _enableWakelock();
-    
-    // Restart slideshow timer if we have photos
-    if (_currentPhoto != null) {
-      _startTimer();
-    }
-    
-    // IMPORTANT: Always re-apply schedule state when resuming
-    // This ensures correct state after wake-ups (even if timer hasn't fired yet)
-    final config = context.read<ConfigProvider>();
-    if (config.scheduleEnabled) {
-      _applyScheduleState();
-      _scheduleTimer?.cancel();
-      _scheduleTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-        _applyScheduleState();
-      });
+
+  /// Single source of truth for whether the slideshow timer/wakelock should
+  /// be running, derived fresh from both [_isPaused] and [_isDisplayOff].
+  ///
+  /// Both flags are updated independently (by app lifecycle events and by
+  /// the night schedule respectively) and can change in either order. Rather
+  /// than each of them guessing about the other via one-off guards, this is
+  /// called after every change to either flag so the timer state can never
+  /// end up out of sync with reality.
+  void _syncTimerState() {
+    final shouldRun = !_isPaused && !_isDisplayOff;
+    final isRunning = _timer != null;
+    if (shouldRun == isRunning) return;
+
+    if (shouldRun) {
+      print('▶️ Resuming timer and wakelock');
+      _enableWakelock();
+      if (_currentPhoto != null) {
+        _startTimer();
+      }
+    } else {
+      print('⏸️ Stopping timer and wakelock');
+      _timer?.cancel();
+      _timer = null;
+      WakelockPlus.disable();
     }
   }
 
@@ -257,13 +258,26 @@ class _SlideshowScreenState extends State<SlideshowScreen> with TickerProviderSt
       await displayController.setMode(DisplayMode.normal);
     }
     if (mounted) setState(() => _isDisplayOff = false);
+    _syncTimerState();
   }
-  
+
   /// Apply current schedule state (day/night) based on time
   Future<void> _applyScheduleState() async {
+    // Guard against overlapping calls (e.g. a duplicate "resumed" lifecycle
+    // event firing while a previous call is still awaiting native work).
+    if (_applyingScheduleState) return;
+    _applyingScheduleState = true;
+    try {
+      await _applyScheduleStateLocked();
+    } finally {
+      _applyingScheduleState = false;
+    }
+  }
+
+  Future<void> _applyScheduleStateLocked() async {
     final config = context.read<ConfigProvider>();
     if (!config.scheduleEnabled) return;
-    
+
     final now = DateTime.now();
     final dayStart = DateTime(now.year, now.month, now.day, config.dayStartHour, config.dayStartMinute);
     final nightStart = _effectiveNightStartFor(now, config);
@@ -307,17 +321,19 @@ class _SlideshowScreenState extends State<SlideshowScreen> with TickerProviderSt
         await displayController.setMode(DisplayMode.off);
       }
       if (mounted) setState(() => _isDisplayOff = true);
-      
+      _syncTimerState();
+
     } else if (!isNight && _isDisplayOff) {
       // Switch to day mode (screen on)
       print('📺 Switching to DAY mode (screen on)');
-      
+
       if (nativeController != null) {
         await nativeController.wakeNow();
       } else {
         await displayController.setMode(DisplayMode.normal);
       }
       if (mounted) setState(() => _isDisplayOff = false);
+      _syncTimerState();
     } else if (!isNight && !_isDisplayOff && NativeScreenControlService.isSupported) {
       // Day mode and we think display is on - verify actual screen state.
       // This handles the case where the app was restarted after a crash
