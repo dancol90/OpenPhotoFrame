@@ -8,6 +8,23 @@ import android.util.Log
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
+// Common file manager apps, tried by package name so they launch as a normal
+// app (with delete/rename support) instead of a single-file picker dialog.
+private val KNOWN_FILE_MANAGER_PACKAGES = listOf(
+    "com.google.android.apps.nbu.files", // Files by Google
+    "com.android.documentsui", // AOSP Files
+    "com.sec.android.app.myfiles", // Samsung My Files
+    "com.mi.android.globalFileexplorer", // Xiaomi/MIUI File Manager
+    "com.miui.filemanager",
+    "com.huawei.filemanager",
+    "com.coloros.filemanager", // Oppo/Realtek
+    "com.oppo.filemanager",
+    "com.oneplus.filemanager",
+    "com.lenovo.FileBrowser",
+    "com.asus.filemanager",
+    "com.mediatek.filemanager",
+)
+
 class FileManagerHandler(private val activity: Activity) {
     fun configureChannel(flutterEngine: FlutterEngine) {
         MethodChannel(
@@ -22,16 +39,16 @@ class FileManagerHandler(private val activity: Activity) {
     }
 
     private fun openFileManager(): Boolean {
-        val intents = listOf(
+        val intents = mutableListOf(
             Intent(Intent.ACTION_MAIN).addCategory("android.intent.category.APP_FILES"),
+        )
+        for (packageName in KNOWN_FILE_MANAGER_PACKAGES) {
+            activity.packageManager.getLaunchIntentForPackage(packageName)?.let { intents.add(it) }
+        }
+        intents.add(
             Intent("android.provider.action.BROWSE").setData(
                 DocumentsContract.buildRootUri("com.android.externalstorage.documents", "primary")
-            ),
-            // Devices without a standalone file manager can still browse documents.
-            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = "*/*"
-            }
+            )
         )
         for (intent in intents) {
             try {
