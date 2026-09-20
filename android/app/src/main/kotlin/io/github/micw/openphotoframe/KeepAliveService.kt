@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -39,6 +40,19 @@ class KeepAliveService : Service() {
         private const val CHANNEL_ID = "keep_alive_channel"
         private const val CHANNEL_NAME = "Photo Frame Keep Alive"
         private const val RESTART_DELAY_MS = 2000L // Wait 2s before restarting MainActivity
+
+        // Bounds how many times we'll try to relaunch a crashing MainActivity within
+        // RESTART_WINDOW_MS. Without this, a MainActivity that crashes immediately on
+        // launch (e.g. a display/GPU hiccup right after a long screen-off period) kills
+        // this same-process service too; START_STICKY then restarts the service, which
+        // immediately retries the launch - an unbounded crash/respawn loop that can peg
+        // the CPU and flood system_server with binder traffic. State is persisted
+        // because the loop kills the process the in-memory counter would otherwise live in.
+        private const val PREFS_NAME = "KeepAliveServiceState"
+        private const val KEY_ATTEMPT_COUNT = "restart_attempt_count"
+        private const val KEY_WINDOW_START = "restart_window_start"
+        private const val MAX_RESTART_ATTEMPTS = 5
+        private const val RESTART_WINDOW_MS = 5 * 60 * 1000L // 5 minutes
     }
 
     override fun onCreate() {
@@ -73,16 +87,68 @@ class KeepAliveService : Service() {
     }
     
     /**
-     * Ensures MainActivity is running. If not, starts it.
+     * Ensures MainActivity is running. If not, starts it - unless we've already
+     * made too many restart attempts recently, in which case we back off rather
+     * than risk an unbounded crash/respawn loop.
      * This is called after the service restarts following an OOM kill.
      */
     private fun ensureMainActivityIsRunning() {
-        if (!isMainActivityRunning()) {
-            Log.w(TAG, "MainActivity is not running, restarting it")
-            startMainActivity()
-        } else {
+        if (isMainActivityRunning()) {
             Log.d(TAG, "MainActivity is already running")
+            resetRestartAttempts()
+            return
         }
+
+        if (!consumeRestartAttempt()) {
+            Log.e(
+                TAG,
+                "MainActivity restarted $MAX_RESTART_ATTEMPTS times in the last " +
+                    "${RESTART_WINDOW_MS}ms and is still not running - backing off " +
+                    "instead of retrying again to avoid a crash loop"
+            )
+            return
+        }
+
+        Log.w(TAG, "MainActivity is not running, restarting it")
+        startMainActivity()
+    }
+
+    /**
+     * Returns true if another restart attempt is allowed right now, and records it.
+     * Persisted in SharedPreferences (not a plain field) because the crash loop this
+     * guards against kills the very process an in-memory counter would live in.
+     */
+    private fun consumeRestartAttempt(): Boolean {
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val now = System.currentTimeMillis()
+        val windowStart = prefs.getLong(KEY_WINDOW_START, 0L)
+        var count = prefs.getInt(KEY_ATTEMPT_COUNT, 0)
+
+        if (now - windowStart > RESTART_WINDOW_MS) {
+            // Previous window (or backoff period) has elapsed - start a fresh one.
+            windowStartFreshAt(prefs, now)
+            count = 0
+        }
+
+        if (count >= MAX_RESTART_ATTEMPTS) {
+            return false
+        }
+
+        prefs.edit().putInt(KEY_ATTEMPT_COUNT, count + 1).apply()
+        return true
+    }
+
+    private fun windowStartFreshAt(prefs: SharedPreferences, now: Long) {
+        prefs.edit()
+            .putLong(KEY_WINDOW_START, now)
+            .putInt(KEY_ATTEMPT_COUNT, 0)
+            .apply()
+    }
+
+    private fun resetRestartAttempts() {
+        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+            .putInt(KEY_ATTEMPT_COUNT, 0)
+            .apply()
     }
     
     /**
