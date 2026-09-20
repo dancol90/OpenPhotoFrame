@@ -24,13 +24,18 @@ subprojects {
 }
 
 subprojects {
-    plugins.withId("com.android.application") {
-        extensions.configure<ApplicationAndroidComponentsExtension>("androidComponents") {
-            finalizeDsl { extension ->
-                extension.compileSdk = 37
-                extension.defaultConfig {
-                    minSdk = 24
-                    targetSdk = 37
+    // :app sets its own compileSdk/minSdk/targetSdk directly in app/build.gradle.kts;
+    // configuring it again here would race with app's own androidComponents.onVariants
+    // registration and finalize the DSL too late under AGP 9.
+    if (project.name != "app") {
+        plugins.withId("com.android.application") {
+            extensions.configure<ApplicationAndroidComponentsExtension>("androidComponents") {
+                finalizeDsl { extension ->
+                    extension.compileSdk = 37
+                    extension.defaultConfig {
+                        minSdk = 24
+                        targetSdk = 37
+                    }
                 }
             }
         }

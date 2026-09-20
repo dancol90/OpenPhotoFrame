@@ -1180,7 +1180,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
   
   Future<void> _pickFolder() async {
     try {
-      String? selectedDirectory = await FilePicker.platform.getDirectoryPath(
+      String? selectedDirectory = await FilePicker.getDirectoryPath(
         dialogTitle: 'Select Photo Folder',
       );
       
