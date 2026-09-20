@@ -347,6 +347,20 @@ class _SlideshowScreenState extends State<SlideshowScreen> with TickerProviderSt
           await displayController.setMode(DisplayMode.normal);
         }
       }
+    } else if (isNight && _isDisplayOff && NativeScreenControlService.isSupported) {
+      // Night mode and we think display is off - verify actual screen state.
+      // This handles a manual wake (e.g. power button) before the scheduled
+      // wake time: the screen turns physically on but it's still night, so
+      // nothing here otherwise notices and turns it back off.
+      final screenOn = await NativeScreenControlService.isScreenOn();
+      if (screenOn) {
+        print('📺 Screen is physically on but should be off (manual wake during night) - turning off again');
+        if (config.useNativeScreenOff && nativeController != null) {
+          await nativeController.sleepUntil(nextTransition);
+        } else {
+          await displayController.setMode(DisplayMode.off);
+        }
+      }
     }
   }
 
